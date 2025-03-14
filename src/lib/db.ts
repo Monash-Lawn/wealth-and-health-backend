@@ -1,5 +1,8 @@
 import { DataAPIClient, Db } from "@datastax/astra-db-ts";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 let db: Db;
 
 /**
@@ -30,7 +33,7 @@ export function connectToDatabase() {
 }
 
 
-export function getDb() {
+export function getDb(): Db {
   if (!db) {
     connectToDatabase();
   }
