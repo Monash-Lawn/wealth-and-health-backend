@@ -3,6 +3,8 @@ import { getDb } from "../lib/db.ts";
 
 const db = getDb();
 
+export const COLLECTION_NAME = 'analytics';
+
 interface Analytics extends SomeDoc {
     location: ObjectId;
     category: number;

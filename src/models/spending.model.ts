@@ -3,6 +3,8 @@ import { getDb } from '../lib/db.ts';
 
 const db = getDb();
 
+export const COLLECTION_NAME = 'spendings';
+
 interface Spending extends SomeDoc {
     price: number;
     category: number;
@@ -15,7 +17,7 @@ interface Spending extends SomeDoc {
 let collection: Collection<Spending> | null = null;
 
 (async function () {
-    collection = await db.createCollection('spendings', {
+    collection = await db.createCollection(COLLECTION_NAME, {
         indexing: {
             allow: ['user']
         }

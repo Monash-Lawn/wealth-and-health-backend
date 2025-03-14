@@ -3,6 +3,8 @@ import { getDb } from '../lib/db.ts';
 
 const db = getDb();
 
+export const COLLECTION_NAME = 'locations';
+
 interface Location extends SomeDoc {
     name: string;
     lat: number;
@@ -12,11 +14,7 @@ interface Location extends SomeDoc {
 let collection: Collection<Location> | null = null;
 
 (async function () {
-    collection = await db.createCollection('locations', {
-        defaultId: {
-            type: 'objectId'
-        }
-    });
+    collection = await db.createCollection(COLLECTION_NAME);
 })();
 
 export default collection;

@@ -1,11 +1,16 @@
-import { ObjectId } from '@datastax/astra-db-ts';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload as DefaultJwtPayload } from 'jsonwebtoken';
 
 import dotenv from 'dotenv';
 dotenv.config();
 
+export interface JwtPayload extends DefaultJwtPayload {
+    userId: string;
+}
+
 export const generateToken = (userId: string, res: any) => {
-    const token = jwt.sign({userId}, process.env.JWT_SECRET as string, {
+    const payload: JwtPayload = { userId };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
         expiresIn: '2d'
     });
 

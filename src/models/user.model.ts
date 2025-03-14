@@ -1,6 +1,8 @@
 import { Collection, SomeDoc } from '@datastax/astra-db-ts';
 import { getDb } from '../lib/db.ts';
 
+export const COLLECTION_NAME = 'users';
+
 // Get a new Db instance
 const db = getDb();
 
@@ -19,7 +21,7 @@ interface User extends SomeDoc {
 let collection: Collection<User> | null = null;
 
 (async function () {
-  collection = await db.createCollection('users');
+  collection = await db.createCollection(COLLECTION_NAME);
 })();
 
 export default collection;
