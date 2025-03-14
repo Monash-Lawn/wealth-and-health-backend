@@ -7,7 +7,9 @@
     "esModuleInterop": true,
     "outDir": "dist",
     "allowJs": true,
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "name": "grocery"
+    },
+    {
+        "id": 2,
+        "name": "travel"
+    },
+    {
+        "id": 3,
+        "name": "eating out"
+    },
+    {
+        "id": 4,
+        "name": "healthcare"
+    },
+    {
+        "id": 5,
+        "name": "utility"
+    },
+    {
+        "id": 6,
+        "name": "rent"
+    },
+    {
+        "id": 7,
+        "name": "other"
+    }
+]
