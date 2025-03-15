@@ -2,6 +2,7 @@ import { ObjectId } from '@datastax/astra-db-ts';
 import { InvalidDataError, EntityNotFoundError } from '../lib/error-utils.ts';
 import { getDb } from '../lib/db.ts';
 import { COLLECTION_NAME as LOCATION_COLLECTION_NAME } from '../models/location.model.ts';
+import { COLLECTION_NAME as ANALYTICS_COLLECTION_NAME } from '../models/analytics.model.ts';
 import dotenv from 'dotenv';
 import { fetchLocation, fetchLocationByAddress } from '../lib/geocoding-utils.ts';
 
@@ -9,6 +10,7 @@ dotenv.config();
 
 const db = getDb();
 const Location = db.collection(LOCATION_COLLECTION_NAME);
+const Analytics = db.collection(ANALYTICS_COLLECTION_NAME);
 
 export const createLocation = async (req: any, res: any, next: any) => {
   const { lat, long } = req.body;
@@ -89,9 +91,19 @@ export const getLocation = async (req: any, res: any, next: any) => {
 export const getLocations = async (req: any, res: any, next: any) => {
   const locations = await Location.find({}).toArray();
 
+  const analytics = Object.fromEntries(
+    await Promise.all(
+      locations.map(async (location) => {
+        const data = await Analytics.find({ location: location._id }).toArray();
+        return [location._id as string, data]; // Ensure key is a string
+      })
+    )
+  );
+
   res.status(200).json({
     success: true,
     error: false,
-    locations
+    locations,
+    analytics
   });
 }
