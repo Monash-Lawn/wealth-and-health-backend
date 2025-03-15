@@ -12,7 +12,7 @@ export enum UserSize {
 }
 
 // Define the schema for the collection
-interface User extends SomeDoc {
+export interface User extends SomeDoc {
   username: string,
   password: string,
   size: UserSize
