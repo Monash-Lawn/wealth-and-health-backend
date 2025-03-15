@@ -25,7 +25,7 @@ export const createSpending = async (req: any, res: any, next: any) => {
   const { price, category, date, lat, long, remark = '' } = req.body;
   const user = req.user;
 
-  if (!price || !category || !date || !lat || !long) {
+  if (price === undefined || category === undefined || !date || lat === undefined || long === undefined) {
     return next(new InvalidDataError('All required spending details must be provided.'));
   }
 
