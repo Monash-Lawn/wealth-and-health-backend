@@ -37,3 +37,6 @@ export async function safeGetAnalytics(location: Location, category: number): Pr
         numberOfSpendings: newAnalytic.numberOfSpendings
     };
 }
+
+
+

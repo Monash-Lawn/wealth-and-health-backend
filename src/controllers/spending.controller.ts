@@ -16,6 +16,11 @@ const Analytics = db.collection(ANALYTICS_COLLECTION_NAME);
 
 const isValidCategory = (categoryId: number) => categories.some((cat: Category) => cat.id === categoryId);
 
+function parseCustomDate(dateStr: string): Date {
+  const [day, month, year] = dateStr.split('/').map(Number);
+  return new Date(year, month - 1, day); // month is zero-based in JS Date
+}
+
 export const createSpending = async (req: any, res: any, next: any) => {
   const { price, category, date, lat, long, remark = '' } = req.body;
   const user = req.user;
@@ -39,7 +44,7 @@ export const createSpending = async (req: any, res: any, next: any) => {
   const result = await Spending.insertOne({
     price,
     category,
-    date: new Date(date),
+    date: parseCustomDate(date),
     location: location._id,
     remark: remark,
     user: user._id,
