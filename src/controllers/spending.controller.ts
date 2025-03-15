@@ -1,4 +1,3 @@
-import { ObjectId } from '@datastax/astra-db-ts';
 import { InvalidDataError, EntityNotFoundError } from '../lib/error-utils.ts';
 import { getDb } from '../lib/db.ts';
 import { COLLECTION_NAME as SPENDING_COLLECTION_NAME } from '../models/spending.model.ts';

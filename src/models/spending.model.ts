@@ -1,11 +1,11 @@
-import { Collection, ObjectId, SomeDoc } from '@datastax/astra-db-ts';
+import { Collection, ObjectId, VectorDoc } from '@datastax/astra-db-ts';
 import { getDb } from '../lib/db.ts';
 
 const db = getDb();
 
 export const COLLECTION_NAME = 'spendings';
 
-export interface Spending extends SomeDoc {
+export interface Spending extends VectorDoc {
     price: number;
     category: number;
     date: Date;

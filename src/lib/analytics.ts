@@ -2,13 +2,12 @@ import { Analytics as AnalyticsSchema } from "../models/analytics.model.ts";
 import { COLLECTION_NAME as ANALYTICS_COLLECTION_NAME } from '../models/analytics.model.ts';
 import { getDb } from "./db.ts";
 import { Location } from "../models/location.model.ts";
-import { ObjectId } from "@datastax/astra-db-ts";
 
 const db = getDb();
 const Analytics = db.collection(ANALYTICS_COLLECTION_NAME);
 
 
-export async function safeGetAnalytics(location: Location, category: number): Promise<AnalyticsSchema> {
+export async function safeGetAnalytics(location: Location, category: number): Promise<any> {
     const analytic = await Analytics.findOne({ location: location._id, category });
 
     if (analytic) {
