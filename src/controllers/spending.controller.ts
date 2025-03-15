@@ -2,10 +2,12 @@ import { ObjectId } from '@datastax/astra-db-ts';
 import { InvalidDataError, EntityNotFoundError } from '../lib/error-utils.ts';
 import { getDb } from '../lib/db.ts';
 import { COLLECTION_NAME as SPENDING_COLLECTION_NAME } from '../models/spending.model.ts';
+
 import { getCategories, Category } from '../lib/category.ts';
 
 
 const categories = getCategories();
+
 
 const db = getDb();
 const Spending = db.collection(SPENDING_COLLECTION_NAME);
