@@ -3,7 +3,7 @@ import { InvalidDataError, EntityNotFoundError } from '../lib/error-utils.ts';
 import { getDb } from '../lib/db.ts';
 import { COLLECTION_NAME as LOCATION_COLLECTION_NAME } from '../models/location.model.ts';
 import dotenv from 'dotenv';
-import { fetchLocation } from '../lib/geocoding-utils.ts'; 
+import { fetchLocation, fetchLocationByAddress } from '../lib/geocoding-utils.ts'; 
 
 dotenv.config();
 
@@ -18,35 +18,13 @@ export const createLocation = async (req: any, res: any, next: any) => {
   }
 
   try {
-    const geocodingApiKey = process.env.GOOGLE_MAP_API_KEY;
-
-    if (!geocodingApiKey) {
-      console.warn("Geocoding API key not found.");
-      const result = await Location.insertOne({
-        name: "Unnamed Location",
-        lat: Number(lat),
-        long: Number(long)
-      });
-      
-      return res.status(201).json({
-        success: true,
-        error: false,
-        id: result.insertedId,
-        location: {
-          _id: result.insertedId,
-          name: "Unnamed Location",
-          lat: Number(lat),
-          long: Number(long)
-        }
-      });
-    }
-
-    const geocodingResponse = await fetchLocation(lat, long, geocodingApiKey);
+    const geocodingResponse = await fetchLocation(lat, long);
 
     let name = "Unnamed Location";
 
     if (geocodingResponse.results && geocodingResponse.results.length > 0 && geocodingResponse.status === "OK") {
-      name = geocodingResponse.results[0].formatted_address;
+      const locality = geocodingResponse.results.filter(result => result.types.includes('locality'))[0];
+      name = locality.formatted_address;
     }
 
     const result = await Location.insertOne({
