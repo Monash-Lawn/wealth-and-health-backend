@@ -5,7 +5,7 @@ const db = getDb();
 
 export const COLLECTION_NAME = 'locations';
 
-interface Location extends SomeDoc {
+export interface Location extends SomeDoc {
     name: string;
     lat: number;
     long: number;

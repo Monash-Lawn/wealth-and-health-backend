@@ -5,7 +5,7 @@ const db = getDb();
 
 export const COLLECTION_NAME = 'spendings';
 
-interface Spending extends SomeDoc {
+export interface Spending extends SomeDoc {
     price: number;
     category: number;
     date: Date;

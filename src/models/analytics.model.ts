@@ -5,7 +5,7 @@ const db = getDb();
 
 export const COLLECTION_NAME = 'analytics';
 
-interface Analytics extends SomeDoc {
+export interface Analytics extends SomeDoc {
     location: ObjectId;
     category: number;
     average: number;

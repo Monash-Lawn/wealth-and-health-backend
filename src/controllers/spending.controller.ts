@@ -2,12 +2,17 @@ import { ObjectId } from '@datastax/astra-db-ts';
 import { InvalidDataError, EntityNotFoundError } from '../lib/error-utils.ts';
 import { getDb } from '../lib/db.ts';
 import { COLLECTION_NAME as SPENDING_COLLECTION_NAME } from '../models/spending.model.ts';
-import categories from '../categories.json' with { type: 'json' };
+
+import { getCategories, Category } from '../lib/category.ts';
+
+
+const categories = getCategories();
+
 
 const db = getDb();
 const Spending = db.collection(SPENDING_COLLECTION_NAME);
 
-const isValidCategory = (categoryId: number) => categories.some((cat) => cat.id === categoryId);
+const isValidCategory = (categoryId: number) => categories.some((cat: Category) => cat.id === categoryId);
 
 export const createSpending = async (req: any, res: any, next: any) => {
   const { price, category, date, location, remark, user } = req.body;
