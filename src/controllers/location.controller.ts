@@ -3,7 +3,7 @@ import { InvalidDataError, EntityNotFoundError } from '../lib/error-utils.ts';
 import { getDb } from '../lib/db.ts';
 import { COLLECTION_NAME as LOCATION_COLLECTION_NAME } from '../models/location.model.ts';
 import dotenv from 'dotenv';
-import { fetchLocation, fetchLocationByAddress } from '../lib/geocoding-utils.ts'; 
+import { fetchLocation, fetchLocationByAddress } from '../lib/geocoding-utils.ts';
 
 dotenv.config();
 
@@ -20,17 +20,28 @@ export const createLocation = async (req: any, res: any, next: any) => {
   try {
     const geocodingResponse = await fetchLocation(lat, long);
 
-    let name = "Unnamed Location";
+    const locationData = {
+      name: 'Unnamed Location',
+      lat: Number(lat),
+      long: Number(long)
+    }
 
     if (geocodingResponse.results && geocodingResponse.results.length > 0 && geocodingResponse.status === "OK") {
       const locality = geocodingResponse.results.filter(result => result.types.includes('locality'))[0];
-      name = locality.formatted_address;
+      if (locality.formatted_address) {
+        const loc_res = await fetchLocationByAddress(locality.formatted_address);
+        if (loc_res.results && loc_res.results.length > 0 && loc_res.status === "OK") {
+          locationData.name = locality.formatted_address;
+          locationData.lat = Number(loc_res.results[0].geometry.location.lat);
+          locationData.long = Number(loc_res.results[0].geometry.location.lng);
+        }
+      }
     }
 
     const result = await Location.insertOne({
-      name,
-      lat: Number(lat),
-      long: Number(long)
+      name: locationData.name,
+      lat: locationData.lat,
+      long: locationData.long
     });
 
     res.status(201).json({
@@ -39,9 +50,9 @@ export const createLocation = async (req: any, res: any, next: any) => {
       id: result.insertedId,
       location: {
         _id: result.insertedId,
-        name,
-        lat: Number(lat),
-        long: Number(long)
+        name: locationData.name,
+        lat: locationData.lat,
+        long: locationData.long
       }
     });
   } catch (error) {

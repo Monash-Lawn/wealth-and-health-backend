@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/', createSpending);
 
 // Get all spendings for a specific user (check this endpoint)
-router.get('/user/:userId', getUserSpendings);
+router.get('/', getUserSpendings);
 
 // Get a specific spending by ID
 router.get('/:id', getSpendingById);
