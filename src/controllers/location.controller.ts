@@ -3,7 +3,7 @@ import { InvalidDataError, EntityNotFoundError } from '../lib/error-utils.ts';
 import { getDb } from '../lib/db.ts';
 import { COLLECTION_NAME as LOCATION_COLLECTION_NAME } from '../models/location.model.ts';
 import dotenv from 'dotenv';
-import { getLocationFromCoordinates } from '../lib/geocoding-utils.ts'; 
+import { fetchLocation } from '../lib/geocoding-utils.ts'; 
 
 dotenv.config();
 
@@ -41,7 +41,13 @@ export const createLocation = async (req: any, res: any, next: any) => {
       });
     }
 
-    let name = getLocationFromCoordinates(lat, long, geocodingApiKey)
+    const geocodingResponse = await fetchLocation(lat, long, geocodingApiKey);
+
+    let name = "Unnamed Location";
+
+    if (geocodingResponse.results && geocodingResponse.results.length > 0 && geocodingResponse.status === "OK") {
+      name = geocodingResponse.results[0].formatted_address;
+    }
 
     const result = await Location.insertOne({
       name,
