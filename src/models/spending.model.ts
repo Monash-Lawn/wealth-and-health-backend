@@ -1,4 +1,4 @@
-import { Collection, ObjectId, VectorDoc } from '@datastax/astra-db-ts';
+import { ObjectId, VectorDoc } from '@datastax/astra-db-ts';
 import { getDb } from '../lib/db.ts';
 
 const db = getDb();
@@ -13,15 +13,3 @@ export interface Spending extends VectorDoc {
     remark: string;
     user: ObjectId;
 }
-
-let collection: Collection<Spending> | null = null;
-
-(async function () {
-    collection = await db.createCollection(COLLECTION_NAME, {
-        indexing: {
-            allow: ['user']
-        }
-    });
-})();
-
-export default collection;

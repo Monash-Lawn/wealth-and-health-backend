@@ -1,4 +1,4 @@
-import { Collection, SomeDoc } from '@datastax/astra-db-ts';
+import { SomeDoc } from '@datastax/astra-db-ts';
 import { getDb } from '../lib/db.ts';
 
 const db = getDb();
@@ -10,11 +10,3 @@ export interface Location extends SomeDoc {
     lat: number;
     long: number;
 }
-
-let collection: Collection<Location> | null = null;
-
-(async function () {
-    collection = await db.createCollection(COLLECTION_NAME);
-})();
-
-export default collection;

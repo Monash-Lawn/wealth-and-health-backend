@@ -7,8 +7,6 @@ import spendingRouter from "./routes/spending.route.ts";
 import locationRouter from "./routes/location.route.ts";
 import errorHandler from "./middlewares/error-handler.middleware.ts";
 
-// Collections init
-import "./models/index.ts";
 import { protectRoute } from "./middlewares/auth.middleware.ts";
 
 dotenv.config();

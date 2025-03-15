@@ -1,4 +1,4 @@
-import { Collection, ObjectId, VectorDoc } from "@datastax/astra-db-ts";
+import { ObjectId, VectorDoc } from "@datastax/astra-db-ts";
 import { getDb } from "../lib/db.ts";
 
 const db = getDb();
@@ -11,18 +11,3 @@ export interface Analytics extends VectorDoc {
     average: number;
     numberOfSpendings: number;
 }
-
-let collection: Collection<Analytics> | null = null;
-
-(async function () {
-    collection = await db.createCollection('analytics', {
-        indexing: {
-            allow: ['location', 'category']
-        },
-        defaultId: {
-            type: 'objectId',
-        }
-    });
-})();
-
-export default collection;
