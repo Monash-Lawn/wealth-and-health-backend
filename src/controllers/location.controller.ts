@@ -84,3 +84,14 @@ export const getLocation = async (req: any, res: any, next: any) => {
     next(error);
   }
 };
+
+
+export const getLocations = async (req: any, res: any, next: any) => {
+  const locations = await Location.find({}).toArray();
+
+  res.status(200).json({
+    success: true,
+    error: false,
+    locations
+  });
+}
