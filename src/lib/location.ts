@@ -66,3 +66,17 @@ export async function safeGetLocation(lat: number, long: number): Promise<Locati
 
     return await createLocation(lat, long);
 }
+
+
+export async function getLocation (id: string): Promise<LocationSchema | null> {
+    const location = await Location.findOne({ _id: id });
+
+    if (!location) return null;
+
+    return {
+        _id: location._id,
+        name: location.name,
+        lat: location.lat,
+        long: location.long
+    }
+}

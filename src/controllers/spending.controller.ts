@@ -5,7 +5,7 @@ import { COLLECTION_NAME as SPENDING_COLLECTION_NAME } from '../models/spending.
 import { COLLECTION_NAME as ANALYTICS_COLLECTION_NAME } from '../models/analytics.model.ts';
 
 import { getCategories, Category } from '../lib/category.ts';
-import { safeGetLocation } from '../lib/location.ts';
+import { getLocation, safeGetLocation } from '../lib/location.ts';
 import { safeGetAnalytics } from '../lib/analytics.ts';
 
 const categories = getCategories();
@@ -81,65 +81,60 @@ export const getSpendingById = async (req: any, res: any, next: any) => {
   }
 };
 
-// TODO - Implement the updateSpending function
-
-
-
-
 export const updateSpending = async (req: any, res: any, next: any) => {
   try {
-      const { spendingId, price, category, date, remark } = req.body;
-      const user = req.user;
+    const { spendingId, price, category, date, remark } = req.body;
+    const user = req.user;
 
-      if (!spendingId) {
-          return next(new InvalidDataError('Spending ID is required in the request body.'));
-      }
+    if (!spendingId) {
+      return next(new InvalidDataError('Spending ID is required in the request body.'));
+    }
 
-      // Find the existing spending entry
-      const existingSpending = await Spending.findOne({ _id: spendingId, user: user._id });
+    // Find the existing spending entry
+    const existingSpending = await Spending.findOne({ _id: spendingId, user: user._id });
 
-      if (!existingSpending) {
-          return next(new EntityNotFoundError('Spending entry not found.'));
-      }
+    if (!existingSpending) {
+      return next(new EntityNotFoundError('Spending entry not found.'));
+    }
 
-      // Parse and validate date
-      const parsedDate = parseCustomDate(date);
+    // Parse and validate date
+    const newDate = date ? parseCustomDate(date) : existingSpending.date;
 
-      // Get location (since location doesn't change)
-      const location = await safeGetLocation(existingSpending.lat, existingSpending.long);
+    // Get location (since location doesn't change)
+    const location = await getLocation(existingSpending.location);
 
-      if (existingSpending.category === category) {
+    if (location) {
+      const analytic = await safeGetAnalytics(location, category);
+      // Update total spending]
+      const updatedTotalSpendings = (analytic.average * analytic.numberOfSpendings - existingSpending.price + Number(price));
 
-          const analytic = await safeGetAnalytics(location, category);
+      // Recalculate average
+      analytic.average = updatedTotalSpendings / analytic.numberOfSpendings;
 
-          // Update total spending]
-          const updatedTotalSpendings = (analytic.average * analytic.numberOfSpendings - existingSpending.price + Number(price));
-
-          // Recalculate average
-          analytic.average = updatedTotalSpendings / analytic.numberOfSpendings;
-
-          await Analytics.updateOne(
-              { _id: analytic._id },
-              { $set: { average: analytic.average } }
-          );
-
-      } else {
-
-      }
-
-      await Spending.updateOne(
-          { _id: spendingId },
-          { $set: { price, category, date: parsedDate, remark } }
+      await Analytics.updateOne(
+        { _id: analytic._id },
+        { $set: { average: analytic.average } }
       );
+    }
 
-      res.status(200).json({ success: true, error: false, message: 'Spending updated successfully.' });
+    await Spending.updateOne(
+      { _id: spendingId },
+      {
+        $set: {
+          price,
+          category: category || existingSpending.category,
+          date: newDate,
+          remark: remark || existingSpending.remark
+        }
+      }
+    );
+
+    res.status(200).json({ success: true, error: false, message: 'Spending updated successfully.' });
 
   } catch (error) {
-      next(error);
+    next(error);
   }
 };
-
-
 
 export const deleteSpending = async (req: any, res: any, next: any) => {
   try {
@@ -158,23 +153,26 @@ export const deleteSpending = async (req: any, res: any, next: any) => {
     }
 
     // Get the related analytics entry
-    const location = await safeGetLocation(existingSpending.lat, existingSpending.long);
-    const analytic = await safeGetAnalytics(location, existingSpending.category);
+    const location = await getLocation(existingSpending.location);
 
-    // Adjust analytics
-    if (analytic.numberOfSpendings > 1) {
-      analytic.average = ((analytic.average * analytic.numberOfSpendings) - existingSpending.price) / (analytic.numberOfSpendings - 1);
-      analytic.numberOfSpendings -= 1;
-    } else {
-      analytic.average = 0;
-      analytic.numberOfSpendings = 0;
+    if (location) {
+      const analytic = await safeGetAnalytics(location, existingSpending.category);
+
+      // Adjust analytics
+      if (analytic.numberOfSpendings > 1) {
+        analytic.average = ((analytic.average * analytic.numberOfSpendings) - existingSpending.price) / (analytic.numberOfSpendings - 1);
+        analytic.numberOfSpendings -= 1;
+      } else {
+        analytic.average = 0;
+        analytic.numberOfSpendings = 0;
+      }
+
+      // Update the analytics entry
+      await Analytics.updateOne(
+        { _id: analytic._id },
+        { $set: { average: analytic.average, numberOfSpendings: analytic.numberOfSpendings } }
+      );
     }
-
-    // Update the analytics entry
-    await Analytics.updateOne(
-      { _id: analytic._id },
-      { $set: { average: analytic.average, numberOfSpendings: analytic.numberOfSpendings } }
-    );
 
     // Delete the spending record
     await Spending.findOneAndDelete({ _id: id });
