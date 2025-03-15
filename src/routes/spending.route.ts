@@ -13,7 +13,7 @@ router.get('/', getUserSpendings);
 router.get('/:id', getSpendingById);
 
 // Update a spending entry
-router.put('/:id', updateSpending);
+router.put('/', updateSpending);
 
 // Delete a spending entry
 router.delete('/:id', deleteSpending);

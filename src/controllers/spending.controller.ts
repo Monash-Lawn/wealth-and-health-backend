@@ -81,43 +81,108 @@ export const getSpendingById = async (req: any, res: any, next: any) => {
   }
 };
 
+// TODO - Implement the updateSpending function
+
+
+
+
 export const updateSpending = async (req: any, res: any, next: any) => {
-  const { id } = req.params;
-  const updates = req.body;
-
-  if (updates.category && !isValidCategory(updates.category)) {
-    return next(new InvalidDataError('Invalid category provided.'));
-  }
-
   try {
-    const updated = await Spending.findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: updates },
-      { returnDocument: 'after' }
-    );
+      const { spendingId, price, category, date, remark } = req.body;
+      const user = req.user;
 
-    if (!updated) {
-      return next(new EntityNotFoundError('Spending not found.'));
-    }
+      if (!spendingId) {
+          return next(new InvalidDataError('Spending ID is required in the request body.'));
+      }
 
-    res.status(200).json({ success: true, error: false, spending: updated });
+      // Find the existing spending entry
+      const existingSpending = await Spending.findOne({ _id: spendingId, user: user._id });
+
+      if (!existingSpending) {
+          return next(new EntityNotFoundError('Spending entry not found.'));
+      }
+
+      // Parse and validate date
+      const parsedDate = parseCustomDate(date);
+
+      // Get location (since location doesn't change)
+      const location = await safeGetLocation(existingSpending.lat, existingSpending.long);
+
+      if (existingSpending.category === category) {
+
+          const analytic = await safeGetAnalytics(location, category);
+
+          // Update total spending]
+          const updatedTotalSpendings = (analytic.average * analytic.numberOfSpendings - existingSpending.price + Number(price));
+
+          // Recalculate average
+          analytic.average = updatedTotalSpendings / analytic.numberOfSpendings;
+
+          await Analytics.updateOne(
+              { _id: analytic._id },
+              { $set: { average: analytic.average } }
+          );
+
+      } else {
+
+      }
+
+      await Spending.updateOne(
+          { _id: spendingId },
+          { $set: { price, category, date: parsedDate, remark } }
+      );
+
+      res.status(200).json({ success: true, error: false, message: 'Spending updated successfully.' });
+
   } catch (error) {
-    next(error);
+      next(error);
   }
 };
+
+
 
 export const deleteSpending = async (req: any, res: any, next: any) => {
-  const { id } = req.params;
-
   try {
-    const deleted = await Spending.findOneAndDelete({ _id: id });
+    const { id } = req.params;
+    const user = req.user;
 
-    if (!deleted) {
+    if (!id) {
+      return next(new InvalidDataError('Spending ID is required.'));
+    }
+
+    // Find the spending entry first (to retrieve category, price, location)
+    const existingSpending = await Spending.findOne({ _id: id, user: user._id });
+
+    if (!existingSpending) {
       return next(new EntityNotFoundError('Spending not found.'));
     }
 
-    res.status(200).json({ success: true, error: false, message: 'Spending deleted successfully.' });
+    // Get the related analytics entry
+    const location = await safeGetLocation(existingSpending.lat, existingSpending.long);
+    const analytic = await safeGetAnalytics(location, existingSpending.category);
+
+    // Adjust analytics
+    if (analytic.numberOfSpendings > 1) {
+      analytic.average = ((analytic.average * analytic.numberOfSpendings) - existingSpending.price) / (analytic.numberOfSpendings - 1);
+      analytic.numberOfSpendings -= 1;
+    } else {
+      analytic.average = 0;
+      analytic.numberOfSpendings = 0;
+    }
+
+    // Update the analytics entry
+    await Analytics.updateOne(
+      { _id: analytic._id },
+      { $set: { average: analytic.average, numberOfSpendings: analytic.numberOfSpendings } }
+    );
+
+    // Delete the spending record
+    await Spending.findOneAndDelete({ _id: id });
+
+    res.status(200).json({ success: true, error: false, message: 'Spending deleted successfully and analytics updated.' });
+
   } catch (error) {
     next(error);
   }
 };
+
