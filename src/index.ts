@@ -9,6 +9,7 @@ import errorHandler from "./middlewares/error-handler.middleware.ts";
 
 // Collections init
 import "./models/index.ts";
+import { protectRoute } from "./middlewares/auth.middleware.ts";
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ app.use(express.json());
 app.use("/auth", authRouter);
 
 // Spending routes
-app.use('/spendings', spendingRouter);
+app.use('/spendings', protectRoute, spendingRouter);
 app.use('/location', locationRouter);
 
 app.use(errorHandler);

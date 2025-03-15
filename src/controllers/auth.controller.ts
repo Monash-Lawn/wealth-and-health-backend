@@ -26,8 +26,6 @@ export const login = async (req: any, res: any, next: any) => {
         return next(new NotAuthenticatedError("Invalid credentials.", 401));
     }
 
-    console.log(user);
-
     const token = generateToken(user!._id as string, res);
 
     return res.status(200).json({ success: true, error: false, token });
@@ -35,8 +33,6 @@ export const login = async (req: any, res: any, next: any) => {
 
 export const register = async (req: any, res: any, next: any) => {
     const { username, password } = req.body;
-
-    console.log(User);
 
     if (!username || !password) {
         return next(new InvalidDataError("Username and password are required."));
