@@ -3,7 +3,7 @@ import { getAnalytics, getMonthlyEstimate } from "../controllers/advice.controll
 
 const router = express.Router();
 
-router.get('/monthly-estimate', getMonthlyEstimate);
-router.get('/analytics', getAnalytics);
+router.get('/estimation', getMonthlyEstimate);
+router.get('/spending', getAnalytics);
 
 export default router;
