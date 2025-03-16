@@ -5,6 +5,7 @@ import { connectToDatabase } from "./lib/db.js";
 import authRouter from "./routes/auth.route.ts";
 import spendingRouter from "./routes/spending.route.ts";
 import locationRouter from "./routes/location.route.ts";
+import adviceRouter from "./routes/advice.route.ts";
 import errorHandler from "./middlewares/error-handler.middleware.ts";
 
 import { protectRoute } from "./middlewares/auth.middleware.ts";
@@ -22,6 +23,7 @@ app.use("/auth", authRouter);
 // Spending routes
 app.use('/spendings', protectRoute, spendingRouter);
 app.use('/location', locationRouter);
+app.use('/advice', protectRoute, adviceRouter);
 
 app.use(errorHandler);
 
